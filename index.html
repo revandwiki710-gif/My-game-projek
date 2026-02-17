@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Game Tantangan - Hindari Rintangan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #1a2980, #26d0ce);
+            color: white;
+            padding: 20px;
+            overflow-x: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .character-selection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .character-selection h2 {
+            font-size: 2.5rem;
+            color: #FFD700;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .character-options {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        .character-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .character-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: #FFD700;
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 12px 48px rgba(255, 215, 0, 0.4);
+        }
+
+        .character-icon {
+            font-size: 6rem;
+            margin-bottom: 15px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .character-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            color: #FFD700;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #e0e0e0;
+        }
+        
+        .season-indicator {
+            font-size: 1.3rem;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        
+        .game-container {
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            max-width: 100%;
+        }
+        
+        #gameCanvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+            min-width: 140px;
+        }
+        
+        .control-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #FFD700;
+        }
+        
+        .control-description {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            background-color: #FF8C00;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            touch-action: manipulation;
+        }
+        
+        button:hover {
+            background-color: #FFA500;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+            background-color: #FF7F00;
+        }
+        
+        button:focus {
+            outline: 2px solid #FFD700;
+            outline-offset: 2px;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 15px 25px;
+            border-radius: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .info-item {
+            text-align: center;
+            flex: 1;
+            min-width: 80px;
+        }
+        
+        .info-label {
+            font-size: 0.95rem;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(26, 41, 128, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            display: none;
+            padding: 20px;
+        }
+        
+        .game-over h2 {
+            font-size: 4rem;
+            color: #FF4136;
+            margin-bottom: 30px;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
+            animation: gameOverPulse 1s ease-in-out;
+        }
+
+        @keyframes gameOverPulse {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .game-over-stats {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .game-over-stats p {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .game-over-stats p:last-child {
+            margin-bottom: 0;
+        }
+
+        .game-over-stats span {
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .game-over-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .game-over-buttons button {
+            font-size: 1.2rem;
+            padding: 15px 30px;
+        }
+        
+        .mobile-controls {
+            display: none;
+            margin-top: 20px;
+            gap: 20px;
+        }
+        
+        .mobile-controls button {
+            padding: 20px 30px;
+            font-size: 1.4rem;
+            min-width: 120px;
+        }
+        
+        .audio-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .audio-controls button {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+
+        .difficulty-indicator {
+            font-size: 1.1rem;
+            padding: 8px 15px;
+            background: rgba(255, 69, 0, 0.3);
+            border-radius: 15px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-controls {
+                display: flex;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 0.95rem;
+            }
+            
+            .season-indicator {
+                font-size: 1.1rem;
+            }
+            
+            .info-value {
+                font-size: 1.4rem;
+            }
+
+            .character-options {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .character-selection h2 {
+                font-size: 2rem;
+            }
+
+            .game-over h2 {
+                font-size: 2.5rem;
+            }
+
+            .game-over-stats {
+                padding: 20px 25px;
+            }
+
+            .game-over-stats p {
+                font-size: 1.1rem;
+                flex-direction: column;
+                gap: 5px;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            
+            .mobile-controls button {
+                padding: 15px 25px;
+                font-size: 1.2rem;
+            }
+
+            .character-selection h2 {
+                font-size: 1.5rem;
+            }
+
+            .character-icon {
+                font-size: 4rem;
+            }
+
+            .game-over h2 {
+                font-size: 2rem;
+            }
+
+            .game-over-stats p {
+                font-size: 1rem;
+            }
+
+            .game-over-buttons button {
+                font-size: 1rem;
+                padding: 12px 20px;
+            }
+        }
+        
+        footer {
+            margin-top: 25px;
+            text-align: center;
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Character Selection Screen -->
+    <div class="character-selection" id="characterSelection">
+        <h2>😝 PILIH KARAKTER ANDA 🤡</h2>
+        <div class="character-options">
+            <div class="character-card" onclick="selectCharacter('male')">
+                <div class="character-icon">🧍‍♂️</div>
+                <div class="character-name">LAKI-LAKI</div>
+            </div>
+            <div class="character-card" onclick="selectCharacter('female')">
+                <div class="character-icon">🧍‍♀️</div>
+                <div class="character-name">PEREMPUAN</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header">
+        <h1>🪨 TANTANGAN - HINDARI RINTANGAN 🪨</h1>
+        <p class="subtitle">Hindari rintangan yang jatuh dari atas!</p>
+        <div class="difficulty-indicator" id="difficultyIndicator">🔥 KESULITAN: MUDAH</div>
+        <div class="season-indicator" id="seasonIndicator">🌞 MUSIM: PANAS</div>
+    </div>
+    
+    <div class="game-info">
+        <div class="info-item">
+            <div class="info-label">SKOR</div>
+            <div id="score" class="info-value">0</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">NYAWA</div>
+            <div id="lives" class="info-value">3</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">LEVEL</div>
+            <div id="level" class="info-value">1</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">REKOR</div>
+            <div id="highScore" class="info-value">0</div>
+        </div>
+    </div>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div class="game-over" id="gameOverScreen">
+            <h2>🏁 GAME OVER!</h2>
+            <div class="game-over-stats">
+                <p><span>Skor Akhir:</span> <span id="finalScore">0</span></p>
+                <p><span>Musim Terakhir:</span> <span id="finalSeason">-</span></p>
+                <p><span>Level Tertinggi:</span> <span id="finalLevel">0</span></p>
+            </div>
+            <div class="game-over-buttons">
+                <button id="restartButton">🔄 MAIN LAGI</button>
+                <button id="changeCharacterButton">👤 GANTI KARAKTER</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mobile-controls">
+        <button id="leftButton">⬅️ KIRI</button>
+        <button id="rightButton">KANAN ➡️</button>
+    </div>
+    
+    <div class="controls">
+        <div class="control-item">
+            <div class="control-title">⌨️ KONTROL PC</div>
+            <div class="control-description">Tombol <strong>←</strong> dan <strong>→</strong></div>
+        </div>
+        <div class="control-item">
+            <div class="control-title">📱 KONTROL MOBILE</div>
+            <div class="control-description">Tombol KIRI dan KANAN</div>
+        </div>
+        <div class="control-item">
+            <div class="control-title">🎯 MUSIM</div>
+            <div class="control-description">Berubah setiap 200 poin!</div>
+        </div>
+    </div>
+    
+    <div class="buttons">
+        <button id="startButton" disabled>▶️ MULAI PERMAINAN</button>
+        <button id="pauseButton" disabled>⏸️ JEDA</button>
+    </div>
+    
+    <div class="audio-controls">
+        <button id="musicToggle">🔊 MUSIK: ON</button>
+        <button id="sfxToggle">🔔 SFX: ON</button>
+    </div>
+    
+    <footer>
+        🪨 Game Tantangan &copy; 2026 | <strong style="color: #FFD700;">MULTI SEASON VERSION ❄️🌧️🌞🌴🕳️</strong>
+    </footer>
+
+    <script>
+        // Audio Context
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        let musicEnabled = true;
+        let sfxEnabled = true;
+        let currentMusic = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+        }
+        
+        function playSound(frequency, duration, type = 'sine') {
+            if (!sfxEnabled || !audioCtx) return;
+            
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+        
+        function playBackgroundMusic(seasonType) {
+            if (!musicEnabled || !audioCtx) return;
+            
+            stopBackgroundMusic();
+            
+            const melodies = {
+                summer: [440, 494, 523, 587, 523, 494],
+                winter: [349, 392, 440, 392, 349, 330],
+                rain: [392, 440, 466, 440, 392, 349],
+                durian: [523, 587, 659, 698, 659, 587],
+                space: [330, 370, 392, 440, 392, 370]
+            };
+            
+            const melody = melodies[seasonType] || melodies.summer;
+            let noteIndex = 0;
+            
+            function playNote() {
+                if (!musicEnabled) return;
+                
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.frequency.value = melody[noteIndex];
+                oscillator.type = 'triangle';
+                
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.5);
+                
+                noteIndex = (noteIndex + 1) % melody.length;
+            }
+            
+            currentMusic = setInterval(playNote, 500);
+        }
+        
+        function stopBackgroundMusic() {
+            if (currentMusic) {
+                clearInterval(currentMusic);
+                currentMusic = null;
+            }
+        }
+        
+        const sounds = {
+            collision: () => playSound(100, 0.3, 'sawtooth'),
+            score: () => playSound(800, 0.1, 'sine'),
+            levelUp: () => {
+                playSound(523, 0.1);
+                setTimeout(() => playSound(659, 0.1), 100);
+                setTimeout(() => playSound(784, 0.2), 200);
+            },
+            gameOver: () => {
+                playSound(400, 0.2, 'sawtooth');
+                setTimeout(() => playSound(300, 0.2, 'sawtooth'), 200);
+                setTimeout(() => playSound(200, 0.4, 'sawtooth'), 400);
+            }
+        };
+        
+        // DOM Elements
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const livesElement = document.getElementById('lives');
+        const levelElement = document.getElementById('level');
+        const highScoreElement = document.getElementById('highScore');
+        const seasonIndicator = document.getElementById('seasonIndicator');
+        const difficultyIndicator = document.getElementById('difficultyIndicator');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScoreElement = document.getElementById('finalScore');
+        const finalSeasonElement = document.getElementById('finalSeason');
+        const finalLevelElement = document.getElementById('finalLevel');
+        const startButton = document.getElementById('startButton');
+        const pauseButton = document.getElementById('pauseButton');
+        const restartButton = document.getElementById('restartButton');
+        const changeCharacterButton = document.getElementById('changeCharacterButton');
+        const leftButton = document.getElementById('leftButton');
+        const rightButton = document.getElementById('rightButton');
+        const musicToggle = document.getElementById('musicToggle');
+        const sfxToggle = document.getElementById('sfxToggle');
+        const characterSelection = document.getElementById('characterSelection');
+        
+        // Character selection
+        let selectedCharacter = null;
+
+        function selectCharacter(type) {
+            selectedCharacter = type;
+            characterSelection.style.display = 'none';
+            startButton.disabled = false;
+            initAudio();
+            
+            if (type === 'male') {
+                player.emoji = '🧍‍♂️';
+            } else {
+                player.emoji = '🧍‍♀️';
+            }
+        }
+
+        changeCharacterButton.addEventListener('click', () => {
+            characterSelection.style.display = 'flex';
+            gameOverScreen.style.display = 'none';
+            startButton.disabled = true;
+        });
+        
+        musicToggle.addEventListener('click', () => {
+            musicEnabled = !musicEnabled;
+            musicToggle.textContent = musicEnabled ? '🔊 MUSIK: ON' : '🔇 MUSIK: OFF';
+            if (!musicEnabled) {
+                stopBackgroundMusic();
+            } else if (game.running && !game.paused) {
+                playBackgroundMusic(seasons[game.currentSeason].type);
+            }
+        });
+        
+        sfxToggle.addEventListener('click', () => {
+            sfxEnabled = !sfxEnabled;
+            sfxToggle.textContent = sfxEnabled ? '🔔 SFX: ON' : '🔕 SFX: OFF';
+        });
+        
+        // Definisi Musim LENGKAP dengan LUAR ANGKASA!
+        const seasons = {
+            summer: {
+                name: 'PANAS',
+                icon: '🌞',
+                bg: ['#FF6B35', '#F7931E'],
+                obstacle: {
+                    name: 'Batu',
+                    colors: ['#8B7355', '#A0522D', '#8B4513']
+                },
+                particle: {
+                    emoji: '☀️',
+                    color: '#FFD700'
+                },
+                type: 'summer'
+            },
+            winter: {
+                name: 'SALJU',
+                icon: '❄️',
+                bg: ['#E0F7FA', '#B3E5FC'],
+                obstacle: {
+                    name: 'Bola Salju',
+                    colors: ['#E3F2FD', '#BBDEFB', '#90CAF9']
+                },
+                particle: {
+                    emoji: '❄️',
+                    color: '#FFFFFF'
+                },
+                type: 'winter'
+            },
+            rain: {
+                name: 'HUJAN',
+                icon: '🌧️',
+                bg: ['#455A64', '#607D8B'],
+                obstacle: {
+                    name: 'Batang Kayu',
+                    colors: ['#8D6E63', '#795548', '#6D4C41']
+                },
+                particle: {
+                    emoji: '💧',
+                    color: '#64B5F6'
+                },
+                type: 'rain'
+            },
+            durian: {
+                name: 'DURIAN JATUH',
+                icon: '🌴',
+                bg: ['#2E7D32', '#66BB6A'],
+                obstacle: {
+                    name: 'Durian',
+                    colors: ['#8BC34A', '#7CB342', '#689F38']
+                },
+                particle: {
+                    emoji: '🍃',
+                    color: '#81C784'
+                },
+                type: 'durian'
+            },
+            space: {
+                name: 'LUAR ANGKASA',
+                icon: '🕳️',
+                bg: ['#0a0e27', '#1a1f3a'],
+                obstacle: {
+                    name: 'Meteor & Komet',
+                    colors: ['#FFA500', '#FF6347', '#FF4500', '#87CEEB', '#4169E1']
+                },
+                particle: {
+                    emoji: '⭐',
+                    color: '#FFFFFF'
+                },
+                type: 'space'
+            }
+        };
+        
+        // Difficulty levels
+        const difficulties = {
+            1: { name: 'MUDAH', icon: '🟢', speedMultiplier: 1, spawnRate: 0.035 },
+            2: { name: 'MUDAH', icon: '🟢', speedMultiplier: 1.1, spawnRate: 0.04 },
+            3: { name: 'SEDANG', icon: '🟡', speedMultiplier: 1.2, spawnRate: 0.045 },
+            4: { name: 'SEDANG', icon: '🟡', speedMultiplier: 1.3, spawnRate: 0.05 },
+            5: { name: 'SULIT', icon: '🟠', speedMultiplier: 1.4, spawnRate: 0.055 },
+            6: { name: 'SULIT', icon: '🟠', speedMultiplier: 1.5, spawnRate: 0.06 },
+            7: { name: 'SANGAT SULIT', icon: '🔴', speedMultiplier: 1.6, spawnRate: 0.065 },
+            8: { name: 'EKSTREM', icon: '🔴', speedMultiplier: 1.7, spawnRate: 0.07 },
+            9: { name: 'EKSTREM', icon: '⚫', speedMultiplier: 1.8, spawnRate: 0.075 },
+            10: { name: 'MUSTAHIL', icon: '💀', speedMultiplier: 2.0, spawnRate: 0.085 }
+        };
+
+        function updateDifficultyDisplay() {
+            const difficulty = difficulties[Math.min(game.level, 10)] || difficulties[10];
+            difficultyIndicator.textContent = `${difficulty.icon} KESULITAN: ${difficulty.name}`;
+        }
+        
+        function saveHighScore(score) {
+            try {
+                localStorage.setItem('climberGameHighScore', score.toString());
+            } catch (e) {
+                console.warn('LocalStorage tidak tersedia:', e);
+            }
+        }
+        
+        function loadHighScore() {
+            try {
+                return parseInt(localStorage.getItem('climberGameHighScore')) || 0;
+            } catch (e) {
+                return 0;
+            }
+        }
+        
+        let game = {
+            running: false,
+            paused: false,
+            score: 0,
+            highScore: loadHighScore(),
+            lives: 3,
+            level: 1,
+            speed: 3,
+            gameOver: false,
+            currentSeason: 'summer'
+        };
+        
+        let canvasScale = 1;
+        const baseWidth = 800;
+        const baseHeight = 600;
+        
+        const player = {
+            x: baseWidth / 2 - 25,
+            y: baseHeight - 120,
+            width: 50,
+            height: 70,
+            speed: 8,
+            emoji: '🧍‍♂️'
+        };
+        
+        let obstacles = [];
+        let particles = [];
+        let stars = []; // Untuk bintang di luar angkasa
+        const obstacleWidth = 50;
+        const obstacleHeight = 50;
+        
+        let moveInterval = null;
+        let animationId = null;
+        let lastFrameTime = 0;
+        const targetFPS = 60;
+        const frameDelay = 1000 / targetFPS;
+        
+        // Initialize stars for space theme
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < 100; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2 + 1,
+                    speed: Math.random() * 2 + 0.5,
+                    opacity: Math.random() * 0.8 + 0.2
+                });
+            }
+        }
+        
+        function resizeCanvas() {
+            const maxWidth = Math.min(baseWidth, window.innerWidth - 40);
+            canvasScale = maxWidth / baseWidth;
+            canvas.width = maxWidth;
+            canvas.height = baseHeight * canvasScale;
+            
+            player.y = canvas.height - (120 * canvasScale);
+            player.x = Math.max(0, Math.min(player.x, canvas.width - (player.width * canvasScale)));
+            
+            if (game.currentSeason === 'space') {
+                initStars();
+            }
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        function startMove(direction) {
+            if (moveInterval) return;
+            moveInterval = setInterval(() => movePlayer(direction), 16);
+        }
+        
+        function stopMove() {
+            if (moveInterval) {
+                clearInterval(moveInterval);
+                moveInterval = null;
+            }
+        }
+        
+        function attachControlEvents(button, direction) {
+            let isPressed = false;
+            
+            const startHandler = (e) => {
+                e.preventDefault();
+                if (!isPressed && game.running && !game.paused) {
+                    isPressed = true;
+                    startMove(direction);
+                    button.style.transform = 'scale(0.95)';
+                }
+            };
+            
+            const stopHandler = (e) => {
+                if (e) e.preventDefault();
+                if (isPressed) {
+                    isPressed = false;
+                    stopMove();
+                    button.style.transform = 'scale(1)';
+                }
+            };
+            
+            if ('ontouchstart' in window) {
+                button.addEventListener('touchstart', startHandler, {passive: false});
+                button.addEventListener('touchend', stopHandler, {passive: false});
+                button.addEventListener('touchcancel', stopHandler, {passive: false});
+            } else {
+                button.addEventListener('mousedown', startHandler);
+                button.addEventListener('mouseup', stopHandler);
+                button.addEventListener('mouseleave', stopHandler);
+            }
+        }
+        
+        attachControlEvents(leftButton, 'left');
+        attachControlEvents(rightButton, 'right');
+        
+        document.addEventListener('keydown', (e) => {
+            if (!game.running || game.paused) return;
+            
+            const scaledSpeed = player.speed * canvasScale;
+            
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                player.x -= scaledSpeed;
+                if (player.x < 0) player.x = 0;
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                player.x += scaledSpeed;
+                if (player.x > canvas.width - (player.width * canvasScale)) {
+                    player.x = canvas.width - (player.width * canvasScale);
+                }
+            } else if (e.key === ' ' || e.key === 'Escape') {
+                e.preventDefault();
+                togglePause();
+            }
+        });
+        
+        function movePlayer(direction) {
+            if (!game.running || game.paused) return;
+            const scaledSpeed = player.speed * canvasScale;
+            
+            if (direction === 'left') {
+                player.x -= scaledSpeed;
+                if (player.x < 0) player.x = 0;
+            } else if (direction === 'right') {
+                player.x += scaledSpeed;
+                if (player.x > canvas.width - (player.width * canvasScale)) {
+                    player.x = canvas.width - (player.width * canvasScale);
+                }
+            }
+        }
+        
+        startButton.addEventListener('click', () => {
+            initAudio();
+            startGame();
+        });
+        pauseButton.addEventListener('click', togglePause);
+        restartButton.addEventListener('click', () => {
+            initAudio();
+            restartGame();
+        });
+        
+        function startGame() {
+            if (game.gameOver) {
+                restartGame();
+                return;
+            }
+            game.running = true;
+            game.paused = false;
+            pauseButton.disabled = false;
+            startButton.textContent = '🔄 RESTART';
+            gameOverScreen.style.display = 'none';
+            player.x = canvas.width / 2 - (player.width * canvasScale / 2);
+            player.y = canvas.height - (120 * canvasScale);
+            obstacles = [];
+            particles = [];
+            updateSeasonDisplay();
+            updateDifficultyDisplay();
+            if (game.currentSeason === 'space') initStars();
+            playBackgroundMusic(seasons[game.currentSeason].type);
+        }
+        
+        function togglePause() {
+            if (!game.running) return;
+            game.paused = !game.paused;
+            pauseButton.textContent = game.paused ? '▶️ LANJUTKAN' : '⏸️ JEDA';
+            
+            if (game.paused) {
+                stopMove();
+                stopBackgroundMusic();
+            } else {
+                playBackgroundMusic(seasons[game.currentSeason].type);
+            }
+        }
+        
+        function restartGame() {
+            stopMove();
+            stopBackgroundMusic();
+            
+            game = {
+                running: true,
+                paused: false,
+                score: 0,
+                highScore: loadHighScore(),
+                lives: 3,
+                level: 1,
+                speed: 3,
+                gameOver: false,
+                currentSeason: 'summer'
+            };
+            
+            obstacles = [];
+            particles = [];
+            player.x = canvas.width / 2 - (player.width * canvasScale / 2);
+            player.y = canvas.height - (120 * canvasScale);
+            
+            scoreElement.textContent = game.score;
+            livesElement.textContent = game.lives;
+            levelElement.textContent = game.level;
+            highScoreElement.textContent = game.highScore;
+            gameOverScreen.style.display = 'none';
+            pauseButton.textContent = '⏸️ JEDA';
+            pauseButton.disabled = false;
+            startButton.textContent = '🔄 RESTART';
+            
+            updateSeasonDisplay();
+            updateDifficultyDisplay();
+            playBackgroundMusic(seasons[game.currentSeason].type);
+        }
+        
+        function updateSeasonDisplay() {
+            const season = seasons[game.currentSeason];
+            seasonIndicator.textContent = `${season.icon} MUSIM: ${season.name}`;
+        }
+        
+        function changeSeason() {
+            const seasonKeys = Object.keys(seasons);
+            const currentIndex = seasonKeys.indexOf(game.currentSeason);
+            const nextIndex = (currentIndex + 1) % seasonKeys.length;
+            game.currentSeason = seasonKeys[nextIndex];
+            updateSeasonDisplay();
+            if (game.currentSeason === 'space') initStars();
+            stopBackgroundMusic();
+            playBackgroundMusic(seasons[game.currentSeason].type);
+        }
+        
+        function createObstacle() {
+            const season = seasons[game.currentSeason];
+            const difficulty = difficulties[Math.min(game.level, 10)] || difficulties[10];
+            
+            const obstacle = {
+                x: Math.random() * (canvas.width - (obstacleWidth * canvasScale)),
+                y: -(obstacleHeight * canvasScale),
+                width: obstacleWidth * canvasScale,
+                height: obstacleHeight * canvasScale,
+                color: season.obstacle.colors[Math.floor(Math.random() * season.obstacle.colors.length)],
+                speed: (game.speed + Math.random() * 2) * canvasScale * difficulty.speedMultiplier,
+                type: game.currentSeason,
+                rotation: 0,
+                isMeteor: game.currentSeason === 'space' && Math.random() > 0.5
+            };
+            obstacles.push(obstacle);
+        }
+        
+        function createParticle() {
+            const season = seasons[game.currentSeason];
+            const particle = {
+                x: Math.random() * canvas.width,
+                y: -(10 * canvasScale),
+                size: (Math.random() * 3 + 2) * canvasScale,
+                speed: (Math.random() * 2 + 1) * canvasScale,
+                emoji: season.particle.emoji,
+                opacity: Math.random() * 0.5 + 0.3
+            };
+            particles.push(particle);
+        }
+        
+        function drawPlayer() {
+            const scaledWidth = player.width * canvasScale;
+            const scaledHeight = player.height * canvasScale;
+            
+            ctx.save();
+            ctx.font = `${scaledHeight}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText(player.emoji, player.x + scaledWidth/2, player.y + scaledHeight);
+            ctx.restore();
+        }
+        
+        function drawObstacles() {
+            obstacles.forEach(obstacle => {
+                ctx.save();
+                ctx.translate(obstacle.x + obstacle.width/2, obstacle.y + obstacle.height/2);
+                ctx.rotate(obstacle.rotation);
+                
+                if (obstacle.type === 'space') {
+                    // Meteor atau Komet
+                    if (obstacle.isMeteor) {
+                        // Meteor - batu berapi
+                        ctx.fillStyle = obstacle.color;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, obstacle.width/2, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Api di sekitar meteor
+                        ctx.fillStyle = 'rgba(255, 100, 0, 0.6)';
+                        ctx.beginPath();
+                        ctx.arc(0, 0, obstacle.width/1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Inti meteor
+                        ctx.fillStyle = '#8B4513';
+                        for (let i = 0; i < 3; i++) {
+                            ctx.beginPath();
+                            ctx.arc(
+                                (Math.random() - 0.5) * obstacle.width/3, 
+                                (Math.random() - 0.5) * obstacle.height/3, 
+                                obstacle.width/8, 
+                                0, Math.PI * 2
+                            );
+                            ctx.fill();
+                        }
+                    } else {
+                        // Komet - dengan ekor
+                        ctx.fillStyle = obstacle.color;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, obstacle.width/2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Ekor komet
+                        const gradient = ctx.createLinearGradient(0, 0, 0, -obstacle.height * 2);
+                        gradient.addColorStop(0, obstacle.color);
+                        gradient.addColorStop(1, 'rgba(135, 206, 235, 0)');
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(-obstacle.width/3, -obstacle.height * 1.5);
+                        ctx.lineTo(obstacle.width/3, -obstacle.height * 1.5);
+                        ctx.closePath();
+                        ctx.fill();
+                        
+                        // Inti komet bersinar
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                        ctx.beginPath();
+                        ctx.arc(0, 0, obstacle.width/5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else if (obstacle.type === 'rain') {
+                    ctx.fillStyle = obstacle.color;
+                    ctx.fillRect(-obstacle.width/2, -obstacle.height * 0.35, obstacle.width, obstacle.height * 0.7);
+                    ctx.strokeStyle = '#5D4037';
+                    ctx.lineWidth = 2 * canvasScale;
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(-obstacle.width/2, -obstacle.height * 0.35 + i * obstacle.height * 0.25);
+                        ctx.lineTo(obstacle.width/2, -obstacle.height * 0.35 + i * obstacle.height * 0.25);
+                        ctx.stroke();
+                    }
+                } else if (obstacle.type === 'winter') {
+                    ctx.fillStyle = obstacle.color;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, obstacle.width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.beginPath();
+                    ctx.arc(-obstacle.width/6, -obstacle.height/6, obstacle.width/5, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (obstacle.type === 'durian') {
+                    ctx.fillStyle = obstacle.color;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, obstacle.width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#558B2F';
+                    for (let i = 0; i < 12; i++) {
+                        const angle = (Math.PI * 2 / 12) * i;
+                        const x1 = Math.cos(angle) * obstacle.width/2;
+                        const y1 = Math.sin(angle) * obstacle.height/2;
+                        const x2 = Math.cos(angle) * obstacle.width/1.5;
+                        const y2 = Math.sin(angle) * obstacle.height/1.5;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(x2, y2);
+                        ctx.lineTo(x1 + Math.cos(angle + 0.2) * obstacle.width/2, y1 + Math.sin(angle + 0.2) * obstacle.height/2);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                    
+                    ctx.fillStyle = 'rgba(205, 220, 57, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(-obstacle.width/4, -obstacle.height/4, obstacle.width/4, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = obstacle.color;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, obstacle.width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(-obstacle.width/6, -obstacle.height/6, obstacle.width/6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            });
+        }
+        
+        function drawParticles() {
+            particles.forEach(particle => {
+                ctx.save();
+                ctx.globalAlpha = particle.opacity;
+                ctx.font = `${particle.size * 8}px Arial`;
+                ctx.fillText(particle.emoji, particle.x, particle.y);
+                ctx.restore();
+            });
+        }
+        
+        function drawBackground() {
+            const season = seasons[game.currentSeason];
+            
+            if (season.type === 'space') {
+                // Luar angkasa dengan bintang
+                const gradient = ctx.createRadialGradient(
+                    canvas.width/2, canvas.height/2, 0,
+                    canvas.width/2, canvas.height/2, canvas.width
+                );
+                gradient.addColorStop(0, '#1a1f3a');
+                gradient.addColorStop(1, '#0a0e27');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Black hole di tengah atas
+                const blackHoleGradient = ctx.createRadialGradient(
+                    canvas.width/2, canvas.height * 0.2, 0,
+                    canvas.width/2, canvas.height * 0.2, 80 * canvasScale
+                );
+                blackHoleGradient.addColorStop(0, '#000000');
+                blackHoleGradient.addColorStop(0.5, '#1a0033');
+                blackHoleGradient.addColorStop(0.8, '#4a0080');
+                blackHoleGradient.addColorStop(1, 'rgba(74, 0, 128, 0)');
+                ctx.fillStyle = blackHoleGradient;
+                ctx.beginPath();
+                ctx.arc(canvas.width/2, canvas.height * 0.2, 80 * canvasScale, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Bintang-bintang
+                stars.forEach(star => {
+                    ctx.save();
+                    ctx.globalAlpha = star.opacity;
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.size * canvasScale, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+            } else {
+                // Background biasa dengan gradient
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, season.bg[0]);
+                gradient.addColorStop(1, season.bg[1]);
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Tambahkan pemandangan gunung & pohon untuk musim darat
+                if (season.type !== 'space') {
+                    drawScenery(season.type);
+                }
+            }
+        }
+        
+        // Fungsi menggambar pemandangan (gunung, bukit, pohon)
+        function drawScenery(seasonType) {
+            const scale = canvasScale;
+            
+            // Gunung jauh (layer belakang)
+            ctx.fillStyle = 'rgba(100, 100, 120, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height * 0.4);
+            ctx.lineTo(canvas.width * 0.3, canvas.height * 0.15);
+            ctx.lineTo(canvas.width * 0.6, canvas.height * 0.4);
+            ctx.lineTo(canvas.width, canvas.height * 0.4);
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Gunung dekat (layer tengah)
+            ctx.fillStyle = seasonType === 'winter' ? 'rgba(200, 220, 255, 0.4)' : 'rgba(80, 120, 80, 0.4)';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height * 0.5);
+            ctx.lineTo(canvas.width * 0.4, canvas.height * 0.25);
+            ctx.lineTo(canvas.width * 0.8, canvas.height * 0.5);
+            ctx.lineTo(canvas.width, canvas.height * 0.5);
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Salju di puncak gunung (jika winter)
+            if (seasonType === 'winter') {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.beginPath();
+                ctx.moveTo(canvas.width * 0.35, canvas.height * 0.3);
+                ctx.lineTo(canvas.width * 0.4, canvas.height * 0.25);
+                ctx.lineTo(canvas.width * 0.45, canvas.height * 0.3);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Bukit depan
+            ctx.fillStyle = seasonType === 'durian' ? 'rgba(50, 100, 50, 0.5)' : 'rgba(60, 80, 60, 0.5)';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height * 0.7);
+            ctx.quadraticCurveTo(canvas.width * 0.25, canvas.height * 0.5, canvas.width * 0.5, canvas.height * 0.7);
+            ctx.quadraticCurveTo(canvas.width * 0.75, canvas.height * 0.9, canvas.width, canvas.height * 0.7);
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Pohon-pohon
+            const treePositions = [
+                {x: 0.15, y: 0.68},
+                {x: 0.35, y: 0.6},
+                {x: 0.7, y: 0.75},
+                {x: 0.85, y: 0.7}
+            ];
+            
+            treePositions.forEach(pos => {
+                const x = canvas.width * pos.x;
+                const y = canvas.height * pos.y;
+                const treeHeight = 40 * scale;
+                const treeWidth = 15 * scale;
+                
+                // Batang pohon
+                ctx.fillStyle = seasonType === 'durian' ? '#6D4C41' : '#654321';
+                ctx.fillRect(x - treeWidth/4, y, treeWidth/2, treeHeight);
+                
+                // Daun pohon
+                if (seasonType === 'winter') {
+                    // Pohon salju (tanpa daun, hanya cabang)
+                    ctx.strokeStyle = '#8B7355';
+                    ctx.lineWidth = 3 * scale;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - treeWidth, y - treeHeight/3);
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + treeWidth, y - treeHeight/3);
+                    ctx.stroke();
+                } else if (seasonType === 'durian') {
+                    // Pohon kelapa/durian
+                    ctx.fillStyle = '#2E7D32';
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                        ctx.beginPath();
+                        ctx.ellipse(
+                            x + Math.cos(angle) * treeWidth * 1.5,
+                            y - treeHeight/2 + Math.sin(angle) * treeWidth,
+                            treeWidth * 1.2,
+                            treeWidth/2,
+                            angle,
+                            0,
+                            Math.PI * 2
+                        );
+                        ctx.fill();
+                    }
+                } else {
+                    // Pohon biasa
+                    ctx.fillStyle = seasonType === 'rain' ? '#4CAF50' : '#66BB6A';
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - treeHeight);
+                    ctx.lineTo(x - treeWidth, y);
+                    ctx.lineTo(x + treeWidth, y);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Layer daun kedua
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - treeHeight * 0.7);
+                    ctx.lineTo(x - treeWidth * 0.8, y - treeHeight * 0.3);
+                    ctx.lineTo(x + treeWidth * 0.8, y - treeHeight * 0.3);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            });
+        }
+        
+        function drawRoad() {
+            const roadHeight = 80 * canvasScale;
+            
+            ctx.fillStyle = '#333';
+            ctx.fillRect(0, canvas.height - roadHeight, canvas.width, roadHeight);
+            
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 3 * canvasScale;
+            ctx.setLineDash([20 * canvasScale, 15 * canvasScale]);
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height - roadHeight/2);
+            ctx.lineTo(canvas.width, canvas.height - roadHeight/2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            ctx.fillStyle = '#555';
+            ctx.fillRect(0, canvas.height - roadHeight, canvas.width, 5 * canvasScale);
+        }
+        
+        function updateStars() {
+            if (game.currentSeason !== 'space') return;
+            
+            stars.forEach(star => {
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = -10;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+        }
+        
+        function updateParticles() {
+            if (particles.length < 20 && Math.random() < 0.15) {
+                createParticle();
+            }
+            
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].y += particles[i].speed;
+                
+                if (particles[i].y > canvas.height) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        function updateObstacles() {
+            const scaledWidth = player.width * canvasScale;
+            const scaledHeight = player.height * canvasScale;
+            
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obstacle = obstacles[i];
+                obstacle.y += obstacle.speed;
+                obstacle.rotation += 0.05;
+                
+                const hitboxPadding = 10 * canvasScale;
+                
+                if (
+                    obstacle.x + hitboxPadding < player.x + scaledWidth - hitboxPadding &&
+                    obstacle.x + obstacle.width - hitboxPadding > player.x + hitboxPadding &&
+                    obstacle.y + hitboxPadding < player.y + scaledHeight - hitboxPadding &&
+                    obstacle.y + obstacle.height - hitboxPadding > player.y + hitboxPadding
+                ) {
+                    obstacles.splice(i, 1);
+                    game.lives--;
+                    livesElement.textContent = game.lives;
+                    sounds.collision();
+                    
+                    if (game.lives <= 0) {
+                        gameOver();
+                    }
+                    continue;
+                }
+                
+                if (obstacle.y > canvas.height) {
+                    obstacles.splice(i, 1);
+                    game.score += 10;
+                    scoreElement.textContent = game.score;
+                    sounds.score();
+                    
+                    if (game.score > game.highScore) {
+                        game.highScore = game.score;
+                        saveHighScore(game.score);
+                        highScoreElement.textContent = game.highScore;
+                    }
+                    
+                    if (game.score % 200 === 0 && game.score > 0) {
+                        changeSeason();
+                        sounds.levelUp();
+                    }
+                    
+                    const newLevel = Math.floor(game.score / 100) + 1;
+                    if (newLevel > game.level) {
+                        game.level = newLevel;
+                        game.speed += 0.4;
+                        levelElement.textContent = game.level;
+                        updateDifficultyDisplay();
+                        sounds.levelUp();
+                    }
+                }
+            }
+        }
+        
+        function gameOver() {
+            stopMove();
+            stopBackgroundMusic();
+            sounds.gameOver();
+            
+            game.running = false;
+            game.gameOver = true;
+            pauseButton.disabled = true;
+            startButton.textContent = '▶️ MULAI PERMAINAN';
+            finalScoreElement.textContent = game.score;
+            finalSeasonElement.textContent = seasons[game.currentSeason].name;
+            finalLevelElement.textContent = game.level;
+            gameOverScreen.style.display = 'flex';
+        }
+        
+        function gameLoop(currentTime) {
+            animationId = requestAnimationFrame(gameLoop);
+            
+            if (currentTime - lastFrameTime < frameDelay) return;
+            
+            if (game.running && !game.paused) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawBackground();
+                updateStars();
+                drawParticles();
+                drawRoad();
+                drawObstacles();
+                drawPlayer();
+                updateParticles();
+                updateObstacles();
+                
+                const difficulty = difficulties[Math.min(game.level, 10)] || difficulties[10];
+                if (Math.random() < difficulty.spawnRate) createObstacle();
+            }
+            
+            lastFrameTime = currentTime;
+        }
+        
+        highScoreElement.textContent = game.highScore;
+        updateSeasonDisplay();
+        updateDifficultyDisplay();
+        animationId = requestAnimationFrame(gameLoop);
+        
+        console.log('%c🎮 Game Loaded Successfully! 🚀', 'color: #FFD700; font-size: 20px; font-weight: bold;');
+        console.log('%c✅ Pemandangan gunung & pohon ditambahkan!', 'color: #26d0ce;');
+        console.log('%c✅ Map luar angkasa dengan Black Hole!', 'color: #26d0ce;');
+        console.log('%c✅ Rintangan meteor & komet!', 'color: #26d0ce;');
+        console.log('%c✅ Game Over screen dirapikan!', 'color: #26d0ce;');
+    </script>
+</body>
+</html
